@@ -25,7 +25,7 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
     protected void execute() {
         Set<Element> ffck = null;
         Set<Element> ff = null;
-        List<Element> rules = new ArrayList<Element>();
+        List<Regle> rules = new ArrayList<Regle>();
         System.out.println("Démarrage de l'algorithme.");
         if (model == null) {
             initModel();
@@ -44,8 +44,13 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
             ff = removeInfrequents(ff);
 
             for (Element e : ff) {
-                rules.add(e);
-                System.out.println(e.toString());
+                //je crée une copie de la fermeture de l'element
+                Set<String> closure = new TreeSet<String>(e.getClosure().getItems());
+                // pour pouvoir supprimer les items contenu dans l'element pour généré le coté droit de la regle.
+                closure.removeAll(e.getItems());
+                Regle r = new Regle(e.getItems(), closure, e.getSupport(), 0, 0);
+                rules.add(r);
+                System.out.println(r.toString());
             }
 
             // Générer les nouveaux candidats
