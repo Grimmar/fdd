@@ -160,8 +160,8 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
             return true;
         }
         /*System.out.println("k : " + k);
-        System.out.println("e : " + e.getItems());
-        System.out.println("e2 : " + e2.getItems());*/
+         System.out.println("e : " + e.getItems());
+         System.out.println("e2 : " + e2.getItems());*/
         int elementCommun = 0;
         for (String elem : e.getItems()) {
             if (e2.getItems().contains(elem)) {
