@@ -39,13 +39,9 @@ public class Regle {
         for(String s : right){
             sb.append(s);
         }
-       
-        // l = closure.size();
-		/*
-         * for (Element s : closure) { sb.append(s.getItems()); i++; if (i < l)
-         * { sb.append(separator); } }
-         */
         sb.append(" support = ").append((float) support);
+        sb.append(" confiance = ").append((float) confiance);
+        sb.append(" lift = ").append((float) lift);
         return sb.toString();
     }
 }
