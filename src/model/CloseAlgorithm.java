@@ -1,6 +1,5 @@
 package model;
 
-import com.sun.java_cup.internal.runtime.Symbol;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -8,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
 import parser.FileParser;
 
 public class CloseAlgorithm extends ThreadedAlgorithm {
@@ -91,10 +89,9 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
         /**
          * Phase 2.
          */
-        Set<Element> frequents = removeInfrequents(candidates);
         Set<Element> frequentsMinimal = new HashSet<Element>();
 
-        Iterator<Element> it = frequents.iterator();
+        Iterator<Element> it = candidates.iterator();
         while (it.hasNext()) {
             Element e = it.next();
             int counter = 0;
