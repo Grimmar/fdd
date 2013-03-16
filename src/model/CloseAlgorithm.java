@@ -16,8 +16,8 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
     private CloseModelInterface model;
 
     public CloseAlgorithm() {
-        closeFile();
-        minSupport = 2.0 / 6;
+        file = null;
+        minSupport = 0.1;
         model = null;
     }
 
@@ -25,7 +25,7 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
     protected void execute() {
         Set<Element> ffck = null;
         Set<Element> ff = null;
-        List<Regle> rules = new ArrayList<Regle>();
+        List<Rule> rules = new ArrayList<Rule>();
         System.out.println("Démarrage de l'algorithme.");
         if (model == null) {
             initModel();
@@ -48,7 +48,9 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
                 Set<String> closure = new TreeSet<String>(e.getClosure().getItems());
                 // pour pouvoir supprimer les items contenu dans l'element pour généré le coté droit de la regle.
                 closure.removeAll(e.getItems());
-                Regle r = new Regle(e.getItems(), closure, e.getSupport(), 0, 0);
+                double lift = computeLift(e.getItems(), closure);
+                double confidence = computeConfidence(e.getItems(), closure);
+                Rule r = new Rule(e.getItems(), closure, e.getSupport(), confidence, lift);
                 rules.add(r);
                 System.out.println(r.toString());
             }
@@ -164,26 +166,24 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
         if (k == 2) {
             return true;
         }
-        /*System.out.println("k : " + k);
-         System.out.println("e : " + e.getItems());
-         System.out.println("e2 : " + e2.getItems());*/
+
         int elementCommun = 0;
         for (String elem : e.getItems()) {
             if (e2.getItems().contains(elem)) {
                 elementCommun++;
             }
         }
-        //System.out.println("elementCommun : " + elementCommun);
         if (elementCommun >= (k - 2)) {
             return true;
         }
+
         return false;
     }
 
     private void initModel() {
         model = FileParser.parse(file);
         if (model == null) {
-            // TODO A traiter
+           throw new IllegalArgumentException("Le fichier est invalide.");
         }
     }
 
@@ -217,7 +217,9 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
         Set<Element> set = new HashSet<Element>();
         for (Element e : items) {
             Element elem = model.generateClosures(e);
-            set.add(elem);
+            if (elem != null || elem.getClosure() != null) {
+                set.add(elem);
+            }
         }
         return set;
     }
@@ -296,5 +298,23 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
         d.add(l);
         algo.setModel(d);
         algo.start();
+    }
+
+    private double computeLift(Set<String> left, Set<String> right) {
+        double s = model.computeSupport(left) * model.computeSupport(right);
+        return getRuleSupport(left, right) / s;
+    }
+
+    private double computeConfidence(Set<String> left, Set<String> right) {
+        return getRuleSupport(left, right) / model.computeSupport(left);
+    }
+
+    private double getRuleSupport(Set<String> left, Set<String> right) {
+        Set<String> all = new TreeSet<String>();
+        all.addAll(left);
+        all.addAll(right);
+        double ruleSupport = model.computeSupport(all);
+        all.clear();
+        return ruleSupport;
     }
 }

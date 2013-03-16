@@ -10,7 +10,7 @@ import java.util.Set;
  *
  * @author David
  */
-public class Regle {
+public class Rule {
 
     private Set<String> left;
     private Set<String> right;
@@ -18,7 +18,7 @@ public class Regle {
     private double confiance;
     private double lift;
 
-    public Regle(Set<String> left, Set<String> right, double support, double confiance, double lift) {
+    public Rule(Set<String> left, Set<String> right, double support, double confiance, double lift) {
         this.left = left;
         this.right = right;
         this.support = support;
@@ -31,7 +31,7 @@ public class Regle {
         if(left.isEmpty() || right.isEmpty()){
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for(String s : left){
             sb.append(s);
         }

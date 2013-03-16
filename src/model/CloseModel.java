@@ -38,9 +38,23 @@ public class CloseModel implements CloseModelInterface {
                 support++;
             }
         }
-        closure.addItems(s);
+        if (s != null) {
+            closure.addItems(s);
+        }
+
         e.setSupport(support / nodes.size());
         e.setClosure(closure);
         return e;
+    }
+
+    @Override
+    public double computeSupport(Set<String> set) {
+        double support = 0;
+        for (Line l : nodes) {
+            if (l.contains(set)) {
+                support++;
+            }
+        }
+        return support / nodes.size();
     }
 }

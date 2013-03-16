@@ -1,6 +1,7 @@
 package model;
 
 import java.util.List;
+import java.util.Set;
 
 public interface CloseModelInterface {
 
@@ -9,4 +10,6 @@ public interface CloseModelInterface {
     public List<Line> getNodes();
 
     public Element generateClosures(Element e);
+
+    public double computeSupport(Set<String> set);
 }
