@@ -50,9 +50,12 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
                 closure.removeAll(e.getItems());
                 double lift = computeLift(e.getItems(), closure);
                 double confidence = computeConfidence(e.getItems(), closure);
+
                 Rule r = new Rule(e.getItems(), closure, e.getSupport(), confidence, lift);
-                rules.add(r);
-                System.out.println(r.toString());
+                if (!closure.isEmpty()) {
+                    rules.add(r);
+                    System.out.println(r.toString());
+                }
             }
 
             // Générer les nouveaux candidats
@@ -183,7 +186,7 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
     private void initModel() {
         model = FileParser.parse(file);
         if (model == null) {
-           throw new IllegalArgumentException("Le fichier est invalide.");
+            throw new IllegalArgumentException("Le fichier est invalide.");
         }
     }
 
