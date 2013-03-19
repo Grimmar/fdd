@@ -17,7 +17,7 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
 
     public CloseAlgorithm() {
         file = null;
-        minSupport = 0.1;
+        minSupport = 2.0/6;
         model = null;
     }
 
@@ -220,6 +220,7 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
             if (elem != null || elem.getClosure() != null) {
                 set.add(elem);
             }
+            e.setClosure(elem);
         }
         return set;
     }
