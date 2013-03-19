@@ -30,12 +30,12 @@ public abstract class ThreadedAlgorithm implements Algorithm {
                     if (isRunning()) {
                         execute();
                     }
-                    fireStateChanged();
                 }
             }
         });
         started = true;
         stopped = false;
+        fireStateChanged();
         thread.start();
     }
 
@@ -77,17 +77,20 @@ public abstract class ThreadedAlgorithm implements Algorithm {
         return stopped;
     }
 
+    @Override
     public ChangeListener[] getChangeListeners() {
         return (ChangeListener[]) listenerList
                 .getListeners(ChangeListener.class);
     }
 
+    @Override
     public void addChangeListener(ChangeListener cl) {
         if (cl != null) {
             listenerList.add(ChangeListener.class, cl);
         }
     }
 
+    @Override
     public void removeChangeListener(ChangeListener cl) {
         if (cl != null) {
             listenerList.remove(ChangeListener.class, cl);

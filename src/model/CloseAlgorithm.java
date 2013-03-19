@@ -14,6 +14,7 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
     private File file;
     private double minSupport;
     private CloseModelInterface model;
+    private List<Rule> rules;
 
     public CloseAlgorithm() {
         file = null;
@@ -25,7 +26,7 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
     protected void execute() {
         Set<Element> ffck = null;
         Set<Element> ff = null;
-        List<Rule> rules = new ArrayList<Rule>();
+        rules = new ArrayList<Rule>();
         System.out.println("Démarrage de l'algorithme.");
         if (model == null) {
             initModel();
@@ -35,6 +36,8 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
         int k = 1;
         // k = 1, on récupère les générateurs de niveau 1
         ffck = initFFC();
+
+        Set<Element> elems = new HashSet<Element>(ffck);
 
         while (!stop) {
             // Fermeture et support
@@ -72,16 +75,16 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
             }
 
         }
+        for (Element e : elems) {
+            System.out.println(e.getClosure());
+        }
         this.stop();
     }
 
     private Set<Element> generateCandidates(int k, Set<Element> ffk) {
 
         /**
-         * Phase 1 Les (k+1)-générateurs candidats sont créés en joignant les
-         * k-générateurs de FFk qui possèdent les mêmes k-1 premiers items. Les
-         * 3-générateurs {ABC} et {ABD} par exemple seront joints afin de créer
-         * le 4-générateur candidat {ABCD}.
+         * Phase 1
          */
         Set<Element> candidates = new HashSet<Element>();
         for (Element e : ffk) {
@@ -223,7 +226,6 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
             if (elem != null || elem.getClosure() != null) {
                 set.add(elem);
             }
-            e.setClosure(elem);
         }
         return set;
     }
@@ -244,10 +246,12 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
         file = null;
     }
 
+    @Override
     public double getMinSupport() {
         return minSupport;
     }
 
+    @Override
     public void setMinSupport(double minSupport) {
         this.minSupport = minSupport;
     }
@@ -258,50 +262,6 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
 
     public void setModel(CloseModelInterface d) {
         this.model = d;
-    }
-
-    public static void main(String[] args) {
-        CloseAlgorithm algo = new CloseAlgorithm();
-        CloseModelInterface d = new CloseModel();
-        Line l = new Line();
-        l.setIdentifier("1");
-        l.addItem("A");
-        l.addItem("C");
-        l.addItem("D");
-        d.add(l);
-        l = new Line();
-        l.setIdentifier("2");
-        l.addItem("B");
-        l.addItem("C");
-        l.addItem("E");
-        d.add(l);
-        l = new Line();
-        l.setIdentifier("3");
-        l.addItem("A");
-        l.addItem("B");
-        l.addItem("C");
-        l.addItem("E");
-        d.add(l);
-        l = new Line();
-        l.setIdentifier("4");
-        l.addItem("B");
-        l.addItem("E");
-        d.add(l);
-        l = new Line();
-        l.setIdentifier("5");
-        l.addItem("A");
-        l.addItem("B");
-        l.addItem("C");
-        l.addItem("E");
-        d.add(l);
-        l = new Line();
-        l.setIdentifier("6");
-        l.addItem("B");
-        l.addItem("C");
-        l.addItem("E");
-        d.add(l);
-        algo.setModel(d);
-        algo.start();
     }
 
     private double computeLift(Set<String> left, Set<String> right) {
@@ -320,5 +280,10 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
         double ruleSupport = model.computeSupport(all);
         all.clear();
         return ruleSupport;
+    }
+
+    @Override
+    public List<Rule> getRules() {
+        return rules;
     }
 }

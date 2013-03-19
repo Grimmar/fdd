@@ -1,6 +1,8 @@
 package model;
 
 import java.io.File;
+import java.util.List;
+import javax.swing.event.ChangeListener;
 
 public interface Algorithm {
 
@@ -16,9 +18,21 @@ public interface Algorithm {
 
     public boolean isStopped();
 
-    public File getFile();
+    File getFile();
 
-    public void setFile(File f);
+    void setFile(File f);
 
-    public void closeFile();
+    void closeFile();
+
+    ChangeListener[] getChangeListeners();
+
+    void addChangeListener(ChangeListener cl);
+
+    void removeChangeListener(ChangeListener cl);
+
+    List<Rule> getRules();
+
+    double getMinSupport();
+
+    void setMinSupport(double minSupport);
 }

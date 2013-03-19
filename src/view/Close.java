@@ -4,11 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.BorderFactory;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -18,14 +25,18 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import model.Algorithm;
 import model.CloseAlgorithm;
+import model.Rule;
 
 public class Close {
 
@@ -98,6 +109,7 @@ public class Close {
         jfc = new JFileChooser() {
             private static final long serialVersionUID = -11708675517620289L;
 
+            @Override
             public boolean accept(File file) {
                 return (file.getName().toLowerCase().endsWith(".txt") || file
                         .isDirectory());
@@ -125,8 +137,9 @@ public class Close {
         {
             JPanel q = new JPanel(new BorderLayout());
             {
-                JPanel r = new JPanel(new GridLayout(3, 2));
+                JPanel r = new JPanel(new GridLayout(2, 2, 5, 10));
                 {
+                    r.setBorder(BorderFactory.createTitledBorder("Algorithme"));
                     r.add(new JLabel("Support"));
                     r.add(support);
                     r.add(start);
@@ -138,12 +151,14 @@ public class Close {
             p.add(q, BorderLayout.WEST);
             q = new JPanel(new GridLayout(1, 0));
             {
+                q.setBorder(BorderFactory.createTitledBorder("Résultats"));
                 q.add(new JScrollPane(rules));
             }
             p.add(q, BorderLayout.CENTER);
             q = new JPanel(null);
             {
                 q.setLayout(new BoxLayout(q, BoxLayout.LINE_AXIS));
+                q.setBorder(BorderFactory.createRaisedBevelBorder());
                 q.add(new JLabel("File: "));
                 q.add(fileLabel);
             }
@@ -190,6 +205,33 @@ public class Close {
         Item.SAVE_RESULTS.getItem().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                int returnVal = jfc.showSaveDialog(frame);
+
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File f = jfc.getSelectedFile();
+                    BufferedWriter br = null;
+                    try {
+                        br = new BufferedWriter(
+                                new OutputStreamWriter(new FileOutputStream(f)));
+                        List<Rule> rulesList = model.getRules();
+                        for (Rule r : rulesList) {
+                            br.write(r.toString());
+                            br.newLine();
+                        }
+
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(frame,
+                                "Une erreur a eu lieu lors de la sauvegarde.",
+                                "Erreur",
+                                JOptionPane.ERROR_MESSAGE);
+                    } finally {
+                        try {
+                            br.close();
+                        } catch (IOException ex) {
+
+                        }
+                    }
+                }
             }
         });
 
@@ -203,33 +245,57 @@ public class Close {
         start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Item.OPEN_FILE.getItem().setEnabled(false);
+                rules.setText("");
+
+                if (model.getFile() != null) {
+                    try {
+                        float f = Float.parseFloat(support.getText());
+                        model.setMinSupport(f);
+
+                        if (f < 0.0 || f > 1.0) {
+                            JOptionPane.showMessageDialog(frame,
+                                    "Le support doit être compris entre 0 et 1.",
+                                    "Erreur",
+                                    JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            Item.OPEN_FILE.getItem().setEnabled(false);
+                            rules.setText("--------- Démarrage de l'algorithme ---------\n\n");
+                            model.start();
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(frame,
+                                "Le support doit être un nombre flottant",
+                                "Erreur",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+
             }
         });
 
         stop.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                model.stop();
                 Item.OPEN_FILE.getItem().setEnabled(true);
             }
         });
 
-        support.addKeyListener(new KeyListener() {
+        model.addChangeListener(new ChangeListener() {
             @Override
-            public void keyTyped(KeyEvent arg0) {
-            }
-
-            @Override
-            public void keyReleased(KeyEvent arg0) {
-                if (!support.getText().isEmpty() && model.getFile() != null) {
-                    start.setEnabled(true);
-                } else {
-                    start.setEnabled(false);
+            public void stateChanged(ChangeEvent e) {
+                if (model.isStopped()) {
+                    Item.OPEN_FILE.getItem().setEnabled(true);
+                    StringBuilder sb = new StringBuilder();
+                    List<Rule> rulesList = model.getRules();
+                    for (Rule r : rulesList) {
+                        sb.append(r).append("\n");
+                    }
+                    rules.append(sb.toString());
+                    rules.append("\n--------- Fin de l'algorithme ---------");
+                    Item.SAVE_RESULTS.getItem().setEnabled(true);
                 }
-            }
 
-            @Override
-            public void keyPressed(KeyEvent arg0) {
             }
         });
     }
