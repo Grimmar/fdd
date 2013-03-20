@@ -1,6 +1,8 @@
 package model;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,18 +17,20 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
     private double minSupport;
     private CloseModelInterface model;
     private List<Rule> rules;
+    private List<Rule> approximativeRules;
 
     public CloseAlgorithm() {
         file = null;
-        minSupport = 2.0/6;
         model = null;
     }
 
     @Override
-    protected void execute() {
+    protected void execute() throws IOException {
         Set<Element> ffck = null;
         Set<Element> ff = null;
         rules = new ArrayList<Rule>();
+        approximativeRules = new ArrayList<Rule>();
+        List<Set<Element>> ffk = new ArrayList<Set<Element>>();
         System.out.println("Démarrage de l'algorithme.");
         if (model == null) {
             initModel();
@@ -45,7 +49,7 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
 
             // Suppression des infréquents
             ff = removeInfrequents(ff);
-
+            ffk.add(ff);
             for (Element e : ff) {
                 //je crée une copie de la fermeture de l'element
                 Set<String> closure = new TreeSet<String>(e.getClosure().getItems());
@@ -69,15 +73,50 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
             // Tester l'arrêt pour arrêter l'algorithme
             if (candidates == null || candidates.isEmpty()) {
                 stop = true;
-                System.out.println("Arrêt du programme.");
             } else {
                 ffck = candidates;
             }
+        }
 
+        //Règles approximatives
+        for (int i = 0; i < k - 1; i++) {
+
+            for (Element g : ffk.get(i)) {
+                List<Set<String>> succg = new ArrayList<Set<String>>();
+                Set<Element> s = new HashSet<Element>();
+                int size = g.getClosure().getItems().size();
+                for (int j = size; j <= k; j++) {
+                    for (int l = 0; l < k - 1; l++) {
+                        for (Element f : ffk.get(l)) {
+                            if (f.getClosure().getItems().containsAll(g.getClosure().getItems())
+                                    && f.getClosure().getItems().size() > size) {
+                                s.add(f);
+                            }
+                        }
+                    }
+                }
+                for (int j = size; j <= k; j++) {
+                    for (Element e : s) {
+                        if (!succg.contains(e.getClosure().getItems())) {
+                            succg.add(e.getClosure().getItems());
+                            Set<String> right = new TreeSet<String>(e.getClosure().getItems());
+                            right.removeAll(g.getItems());
+                            Rule r = new Rule(g.getItems(), right, e.getSupport(),
+                                    e.getSupport() / g.getSupport(),
+                                    computeLift(g.getItems(), right));
+                            if (!approximativeRules.contains(r)) {
+                                approximativeRules.add(r);
+                            }
+                        }
+                    }
+                }
+            }
         }
-        for (Element e : elems) {
-            System.out.println(e.getClosure());
+        System.out.println("Régles approximatives");
+        for (Rule r : approximativeRules) {
+            System.out.println(r);
         }
+        System.out.println("Arrêt du programme.");
         this.stop();
     }
 
@@ -186,7 +225,7 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
         return false;
     }
 
-    private void initModel() {
+    private void initModel() throws FileNotFoundException, IOException {
         model = FileParser.parse(file);
         if (model == null) {
             throw new IllegalArgumentException("Le fichier est invalide.");
@@ -285,5 +324,10 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
     @Override
     public List<Rule> getRules() {
         return rules;
+    }
+
+    @Override
+    public List<Rule> getApproximativeRules() {
+        return approximativeRules;
     }
 }

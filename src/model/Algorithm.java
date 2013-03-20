@@ -6,17 +6,17 @@ import javax.swing.event.ChangeListener;
 
 public interface Algorithm {
 
-    public void start();
+    void start();
 
-    public void stop();
+    void stop();
 
-    public boolean isActive();
+    boolean isActive();
 
-    public boolean isRunning();
+    boolean isRunning();
 
-    public boolean hasStarted();
+    boolean hasStarted();
 
-    public boolean isStopped();
+    boolean isStopped();
 
     File getFile();
 
@@ -35,4 +35,6 @@ public interface Algorithm {
     double getMinSupport();
 
     void setMinSupport(double minSupport);
+
+    List<Rule> getApproximativeRules();
 }

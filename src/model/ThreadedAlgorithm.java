@@ -1,5 +1,6 @@
 package model;
 
+import java.io.IOException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
@@ -28,7 +29,12 @@ public abstract class ThreadedAlgorithm implements Algorithm {
             public void run() {
                 while (!isStopped()) {
                     if (isRunning()) {
-                        execute();
+                        try {
+                            execute();
+                        } catch (IOException ex) {
+                            started = false;
+                            stopped = true;
+                        }
                     }
                 }
             }
@@ -107,5 +113,5 @@ public abstract class ThreadedAlgorithm implements Algorithm {
         }
     }
 
-    protected abstract void execute();
+    protected abstract void execute() throws IOException;
 }

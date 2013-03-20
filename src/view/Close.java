@@ -6,15 +6,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 
 import javax.swing.BoxLayout;
@@ -218,6 +215,11 @@ public class Close {
                             br.write(r.toString());
                             br.newLine();
                         }
+                         rulesList = model.getApproximativeRules();
+                        for (Rule r : rulesList) {
+                            br.write(r.toString());
+                            br.newLine();
+                        }
 
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(frame,
@@ -286,13 +288,18 @@ public class Close {
             public void stateChanged(ChangeEvent e) {
                 if (model.isStopped()) {
                     Item.OPEN_FILE.getItem().setEnabled(true);
-                    StringBuilder sb = new StringBuilder();
+                    StringBuilder sb = new StringBuilder("Règles exactes\n");
                     List<Rule> rulesList = model.getRules();
                     for (Rule r : rulesList) {
                         sb.append(r).append("\n");
                     }
+                    sb.append("\nRègles approximatives\n");
+                    rulesList = model.getApproximativeRules();
+                    for (Rule r : rulesList) {
+                        sb.append(r).append("\n");
+                    }
+                    sb.append("\n--------- Fin de l'algorithme ---------");
                     rules.append(sb.toString());
-                    rules.append("\n--------- Fin de l'algorithme ---------");
                     Item.SAVE_RESULTS.getItem().setEnabled(true);
                 }
 
