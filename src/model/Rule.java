@@ -4,6 +4,8 @@
  */
 package model;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Set;
 
 /**
@@ -39,9 +41,13 @@ public class Rule implements Comparable {
         for (String s : right) {
             sb.append(s);
         }
-        sb.append(" support = ").append((float) support);
-        sb.append(" confiance = ").append((float) confiance);
-        sb.append(" lift = ").append((float) lift);
+        NumberFormat nf = new DecimalFormat();
+        nf.setMaximumFractionDigits(2);
+        nf.setMinimumFractionDigits(2);
+        
+        sb.append(" support = ").append(nf.format(support));
+        sb.append(" confiance = ").append(nf.format(confiance));
+        sb.append(" lift = ").append(nf.format(lift));
         return sb.toString();
     }
 
