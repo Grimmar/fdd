@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -104,7 +106,20 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
                             Rule r = new Rule(g.getItems(), right, e.getSupport(),
                                     e.getSupport() / g.getSupport(),
                                     computeLift(g.getItems(), right));
-                            if (!approximativeRules.contains(r)) {
+                            int sizeOfList = approximativeRules.size();
+                            boolean checkToAdd = true;
+                            for (int v = 0; v < sizeOfList; v++) {
+                                if (approximativeRules.get(v).getLeft().equals(r.getLeft())) {
+                                    if (approximativeRules.get(v).getRight().containsAll(r.getRight())) {
+                                        approximativeRules.remove(v);
+                                    } else if (r.getRight().containsAll(approximativeRules.get(v).getRight())) {
+
+                                        checkToAdd = false;
+                                    }
+
+                                }
+                            }
+                            if (checkToAdd) {
                                 approximativeRules.add(r);
                             }
                         }
@@ -112,11 +127,22 @@ public class CloseAlgorithm extends ThreadedAlgorithm {
                 }
             }
         }
-        System.out.println("Régles approximatives");
+
+        System.out.println(
+                "Régles approximatives");
+        Collections.sort(approximativeRules,
+                new Comparator<Rule>() {
+                    @Override
+                    public int compare(Rule r1, Rule r2) {
+                        return r1.compareTo(r2);
+                    }
+                });
         for (Rule r : approximativeRules) {
             System.out.println(r);
         }
-        System.out.println("Arrêt du programme.");
+
+        System.out.println(
+                "Arrêt du programme.");
         this.stop();
     }
 
